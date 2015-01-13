@@ -5,6 +5,9 @@ module Gauze
       @@filters.push param_key: param_key, column: column_name, method: arel_method, preprocessor: preprocessor
     end
 
+    def self.build(resource, params = {})
+      new(resource, params).build_nodes
+    end
 
     def initialize(resource, params = {})
       @resource = resource

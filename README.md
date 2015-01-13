@@ -34,6 +34,17 @@ The filter method accepts 4 arguments.
 ```ruby
   class EventFilters < Gauze::Base
     filter :start_range, :created_at, :gteq, -> val {Chronic.parse(val)}
+    filter :end_range, :created_at, :lteq, -> val {Chronic.parse(val)}
+  end
+```
+
+Then in your controller:
+```ruby
+  class EventsController < ActionController::Base
+    def index
+      @events = EventFilters.build(Event, params)
+      render json: @events
+    end
   end
 ```
 
