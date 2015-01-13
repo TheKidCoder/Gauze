@@ -48,6 +48,14 @@ Then in your controller:
   end
 ```
 
+Because *Gauze* uses AREL to construct queries, you can use `.build` just like any other scope. You can pass relational objects & chain more relations as you need.
+```
+def index
+  @events = EventFilters.build(current_user.events, params).order(created_at: :desc).where(name: "Football Game")
+  render json: @events
+end
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/TheKidCoder/gauze/fork )
