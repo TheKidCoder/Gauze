@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Gauze::VERSION
   spec.authors       = ["Chris Ostrowski"]
   spec.email         = ["chris@madebyfunction.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{A thin filtering library leveraging AREL & ActionController.}
+  spec.description   = %q{Using scopes on a model that only need to accessed in a controller seems like a leakage of SRP. This gem will allow you to write simple filtering logic that translates your params to AREL queries.}
+  spec.homepage      = "https://github.com/TheKidCoder/Gauze"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
