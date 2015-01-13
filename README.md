@@ -1,11 +1,11 @@
 ![](http://cdn.flaticon.com/png/256/33311.png) 
 # Gauze
 
-Translating filtering & sorting params to AR scopes can be teadious as doesn't belong in your controllers...
+Translating filtering & sorting params to AR scopes can be teadious and doesn't belong in your controllers...
 
 Enter **Gauze**
 
-Gauze allows you to build very simple service objectsm to be called from your controllers and passed the resource & params.
+Gauze allows you to build very simple service objects to be called from your controllers and passed the resource & params.
 
 Read on below to see how it works.
 
