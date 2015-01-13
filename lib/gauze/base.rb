@@ -1,5 +1,17 @@
 module Gauze
   class Base
+    def self.needs(*join_stanza)
+      @@join_stanza ||= nil
+      case @@join_stanza
+      when nil
+        @@join_stanza = join_stanza
+      when Array
+        @@join_stanza.push(join_stanza)
+      when Hash
+        @@join_stanza.merge!(join_stanza)
+      end
+    end
+
     def self.filter(param_key, column_name, arel_method, preprocessor = nil)
       @@filters ||= []
       @@filters.push param_key: param_key, column: column_name, method: arel_method, preprocessor: preprocessor
@@ -18,6 +30,11 @@ module Gauze
       wheres = applied_filters.map {|obj| build_arel_filter(obj)}
       _query = @resource
       wheres.each {|node| _query = _query.where(node)}
+
+      if @@join_stanza.present?
+        _query = _query.joins(@@join_stanza)
+      end
+
       return _query
     end
 
@@ -29,6 +46,9 @@ module Gauze
     end
 
     private
+    def arel_column(hash_param)
+    end
+
     def applied_filters
       _filters = []
       @params.each do |k,v|
