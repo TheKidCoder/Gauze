@@ -1,6 +1,13 @@
+![](http://cdn.flaticon.com/png/256/33311.png) 
 # Gauze
 
-TODO: Write a gem description
+Translating filtering & sorting params to AR scopes can be teadious as doesn't belong in your controllers...
+
+Enter **Gauze**
+
+Gauze allows you to build very simple service objectsm to be called from your controllers and passed the resource & params.
+
+Read on below to see how it works.
 
 ## Installation
 
@@ -24,6 +31,7 @@ Create a class that your controller can find.
 Define filters using the Gauze DSL.
 
 The filter method accepts 4 arguments.
+
 `filter :param_key, :column_name, :arel_method, :preprocessor`
 
 * `:param_key` - The key to look for when params are passed in.
@@ -48,8 +56,8 @@ Then in your controller:
   end
 ```
 
-Because *Gauze* uses AREL to construct queries, you can use `.build` just like any other scope. You can pass relational objects & chain more relations as you need.
-```
+Because **Gauze** uses AREL to construct queries, you can use `.build` just like any other scope. You can pass relational objects & chain more relations as you need.
+```ruby
 def index
   @events = EventFilters.build(current_user.events, params).order(created_at: :desc).where(name: "Football Game")
   render json: @events
