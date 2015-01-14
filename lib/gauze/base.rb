@@ -1,20 +1,20 @@
 module Gauze
   class Base
     def self.needs(*join_stanza)
-      @@join_stanza ||= nil
-      case @@join_stanza
+      @join_stanza ||= nil
+      case @join_stanza
       when nil
-        @@join_stanza = join_stanza
+        @join_stanza = join_stanza
       when Array
-        @@join_stanza.push(join_stanza)
+        @join_stanza.push(join_stanza)
       when Hash
-        @@join_stanza.merge!(join_stanza)
+        @join_stanza.merge!(join_stanza)
       end
     end
 
     def self.filter(param_key, column_name, arel_method, preprocessor = nil)
-      @@filters ||= []
-      @@filters.push param_key: param_key, column: column_name, method: arel_method, preprocessor: preprocessor
+      @filters ||= []
+      @filters.push param_key: param_key, column: column_name, method: arel_method, preprocessor: preprocessor
     end
 
     def self.build(resource, params = {})
@@ -31,8 +31,8 @@ module Gauze
       _query = @resource
       wheres.each {|node| _query = _query.where(node)}
 
-      if @@join_stanza.present?
-        _query = _query.joins(@@join_stanza)
+      if self.class.instance_variable_get(:@join_stanza).present?
+        _query = _query.joins(self.class.instance_variable_get(:@join_stanza))
       end
 
       return _query
@@ -53,7 +53,7 @@ module Gauze
       _filters = []
       @params.each do |k,v|
         next unless v.present?
-        next unless filter = @@filters.find {|obj| obj[:param_key] == k}
+        next unless filter = self.class.instance_variable_get(:@filters).find {|obj| obj[:param_key] == k}
         _filters.push filter
       end
 
