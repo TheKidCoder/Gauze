@@ -18,7 +18,7 @@ module Gauze
     end
 
     def self.build(resource, params = {})
-      new(resource, params).build_nodes
+      new(resource, params).build
     end
 
     def initialize(resource, params = {})
@@ -26,7 +26,7 @@ module Gauze
       @params = params.symbolize_keys
     end
 
-    def build_nodes
+    def build
       wheres = applied_filters.map {|obj| build_arel_filter(obj)}
       _query = @resource
       wheres.each {|node| _query = _query.where(node)}
