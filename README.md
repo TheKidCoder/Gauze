@@ -28,7 +28,7 @@ Or install it yourself as:
 ## Usage
 
 Create a class that your controller can find.
-Define filters using the Gauze DSL.
+Define filters & sorters using the Gauze DSL.
 
 The filter method accepts 4 arguments.
 
@@ -56,6 +56,17 @@ Then in your controller:
   end
 ```
 
+The sorter method accepts 2 arguments.
+
+`sorter :param_key, :column_name`
+
+
+```ruby
+  class EventFilters < Gauze::Base
+    sort :event_name, :name
+  end
+```
+
 Because **Gauze** uses AREL to construct queries, you can use `.build` just like any other scope. You can pass relational objects & chain more relations as you need.
 ```ruby
 def index
@@ -63,6 +74,43 @@ def index
   render json: @events
 end
 ```
+
+### Using Joins
+
+It is possible to filter & sort across joined tables.
+
+To start, you need to let **Gauze** know that you are going to make use of a join.
+Simply add the `needs` method to you gauze classes.
+
+```ruby
+  class CustomerFilters < Gauze::Base
+    needs :person
+  end
+```
+
+This can also be a hash or array, a-la activerecord:
+```ruby
+  needs person: :location, orders: {transaction: :charge}
+```
+
+```ruby
+  needs :person, :location
+```
+
+After you have all of your gauze needs met, you simply use a hash style syntax to filter across the join.
+```ruby
+  class CustomerFilters < Gauze::Base
+    needs :person
+    filter :name, {person: :last_name}, :matches, -> val {"%#{val}%"}
+  end
+```
+
+
+## TO-DO
+- [ ] Write tests.
+- [ ] Add controller hooks.
+ 
+
 
 ## Contributing
 

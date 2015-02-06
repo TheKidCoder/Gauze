@@ -17,6 +17,11 @@ module Gauze
       @filters.push param_key: param_key, column: column_name, method: arel_method, preprocessor: preprocessor
     end
 
+    def self.sorter(param_key, column)
+      @sorters ||= []
+      @sorters.push param_key: param_key, column: column
+    end
+
     def self.build(resource, params = {})
       new(resource, params).build
     end
@@ -31,8 +36,12 @@ module Gauze
       _query = @resource
       wheres.each {|node| _query = _query.where(node)}
 
-      if self.class.instance_variable_get(:@join_stanza).present?
-        _query = _query.joins(self.class.instance_variable_get(:@join_stanza))
+      if get_klass_var(:@join_stanza).present?
+        _query = _query.joins(get_klass_var(:@join_stanza))
+      end
+
+      if get_klass_var(:@sorters).present?
+        _query = build_order_query(_query)
       end
 
       return _query
@@ -42,18 +51,41 @@ module Gauze
       filter_val = @params[filter_hash[:param_key]]
       filter_val = filter_hash[:preprocessor].call(filter_val) if filter_hash[:preprocessor]
 
-      @resource.arel_table[filter_hash[:column]].method(filter_hash[:method]).call(filter_val)
+      if filter_hash[:column].is_a?(Hash)
+        arel_column_from_hash(filter_hash[:column]).method(filter_hash[:method]).call(filter_val)
+      else
+        @resource.arel_table[filter_hash[:column]].method(filter_hash[:method]).call(filter_val)
+      end
+    end
+
+    def build_order_query(query)
+      return query unless @params[:sort].present?
+      sort_column = get_klass_var(:@sorters).find {|h| h[:param_key].to_s == @params[:sort].underscore}
+      return query unless sort_column.present?
+
+      if sort_column[:column].is_a?(Hash)
+        query.order(arel_column_from_hash(sort_column[:column]))
+      else
+        query.order(sort_column[:column])
+      end
     end
 
     private
-    def arel_column(hash_param)
+    def get_klass_var(var)
+      self.class.instance_variable_get(var)
+    end
+
+    def arel_column_from_hash(hash_param)
+      raise ArgumentError, "Hash can only have one key." if hash_param.length > 1
+      _resource = hash_param.keys.first.to_s.classify.constantize
+      _resource.arel_table[hash_param.values.first]
     end
 
     def applied_filters
       _filters = []
       @params.each do |k,v|
         next unless v.present?
-        next unless filter = self.class.instance_variable_get(:@filters).find {|obj| obj[:param_key] == k}
+        next unless filter = get_klass_var(:@filters).find {|obj| obj[:param_key] == k}
         _filters.push filter
       end
 
