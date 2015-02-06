@@ -63,7 +63,7 @@ The sorter method accepts 2 arguments.
 
 ```ruby
   class EventFilters < Gauze::Base
-    sort :event_name, :name
+    sorter :event_name, :name
   end
 ```
 
@@ -80,7 +80,7 @@ end
 It is possible to filter & sort across joined tables.
 
 To start, you need to let **Gauze** know that you are going to make use of a join.
-Simply add the `needs` method to you gauze classes.
+Simply add the `needs` method to your gauze classes.
 
 ```ruby
   class CustomerFilters < Gauze::Base
@@ -102,6 +102,7 @@ After you have all of your gauze needs met, you simply use a hash style syntax t
   class CustomerFilters < Gauze::Base
     needs :person
     filter :name, {person: :last_name}, :matches, -> val {"%#{val}%"}
+    sorter :last_name, {person: :last_name}
   end
 ```
 
