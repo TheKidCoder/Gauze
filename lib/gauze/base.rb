@@ -53,6 +53,8 @@ module Gauze
 
       if filter_hash[:column].is_a?(Hash)
         arel_column_from_hash(filter_hash[:column]).method(filter_hash[:method]).call(filter_val)
+      elsif filter_hash[:column].is_a?(Array)
+        arel_column_from_array(filter_hash[:column], filter_hash[:method], filter_val)
       else
         @resource.arel_table[filter_hash[:column]].method(filter_hash[:method]).call(filter_val)
       end
@@ -73,6 +75,26 @@ module Gauze
     private
     def get_klass_var(var)
       self.class.instance_variable_get(var)
+    end
+
+    def arel_column_from_array(columns, method, value)
+      nodes = nil
+
+      columns.each do |column|
+        if column.is_a?(Hash)
+          arel_node = arel_column_from_hash(column)
+        else
+          arel_node = @resource.arel_table[column]
+        end
+
+        if nodes.present?
+          nodes = nodes.or(arel_node.method(method).call(value))
+        else
+          nodes = arel_node.method(method).call(value)
+        end
+      end
+
+      return nodes
     end
 
     def arel_column_from_hash(hash_param)
