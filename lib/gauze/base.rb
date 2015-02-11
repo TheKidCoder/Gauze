@@ -22,6 +22,10 @@ module Gauze
       @sorters.push param_key: param_key, column: column
     end
 
+    def self.sort_direction(param_key, default, preprocessor = nil)
+      @sort_direction_param = {param_key: param_key, default: default, preprocessor: preprocessor}
+    end
+
     def self.build(resource, params = {})
       new(resource, params).build
     end
@@ -42,6 +46,8 @@ module Gauze
 
       if get_klass_var(:@sorters).present?
         _query = build_order_query(_query)
+      elsif get_klass_var(:@sort_direction_param).present?
+        _query = _query.order(get_klass_var(:@sort_direction_param)[:default])
       end
 
       return _query
@@ -66,15 +72,29 @@ module Gauze
       return query unless sort_column.present?
 
       if sort_column[:column].is_a?(Hash)
-        query.order(arel_column_from_hash(sort_column[:column]))
+        _arel_column = arel_column_from_hash(sort_column[:column])
       else
-        query.order(sort_column[:column])
+        _arel_column = @resource.arel_table[sort_column[:column]]
       end
+
+      _arel_column = _arel_column.method(sort_direction).call
+
+      query.order(_arel_column)
     end
 
     private
     def get_klass_var(var)
       self.class.instance_variable_get(var)
+    end
+
+    def sort_direction
+      sort_options = get_klass_var(:@sort_direction_param)
+
+      sort_direction = @params[sort_options[:param_key]]
+      sort_direction = sort_options[:preprocessor].call(sort_direction) if sort_options[:preprocessor]
+
+      return unless sort_direction.present?
+      sort_direction.to_sym
     end
 
     def arel_column_from_array(columns, method, value)
