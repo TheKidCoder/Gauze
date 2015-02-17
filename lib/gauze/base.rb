@@ -67,9 +67,11 @@ module Gauze
     end
 
     def build_order_query(query)
-      return query unless @params[:sort].present?
+      return default_sort(query) unless @params[:sort].present?
+      
       sort_column = get_klass_var(:@sorters).find {|h| h[:param_key].to_s == @params[:sort].underscore}
-      return query unless sort_column.present?
+
+      return default_sort(query) unless sort_column.present?
 
       if sort_column[:column].is_a?(Hash)
         _arel_column = arel_column_from_hash(sort_column[:column])
@@ -85,6 +87,14 @@ module Gauze
     private
     def get_klass_var(var)
       self.class.instance_variable_get(var)
+    end
+
+    def default_sort(query)
+      if get_klass_var(:@sort_direction_param) && get_klass_var(:@sort_direction_param)[:default]
+        query.order(get_klass_var(:@sort_direction_param)[:default])
+      else
+        query.order(:created_at)
+      end
     end
 
     def sort_direction
