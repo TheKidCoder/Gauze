@@ -79,9 +79,7 @@ module Gauze
         _arel_column = @resource.arel_table[sort_column[:column]]
       end
 
-      _arel_column = _arel_column.method(sort_direction).call
-
-      query.order(_arel_column)
+      query.order(_arel_column.method(sort_direction).call).group(_arel_column)
     end
 
     private
