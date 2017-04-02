@@ -71,9 +71,10 @@ module Gauze
     end
 
     def build_order_query(query)
-      return default_sort(query) unless @params[:sort].present?
+      sory_by_key = (@params[get_klass_var(:@sort_param_key)] || @params[:sort])
+      return default_sort(query) unless sory_by_key.present?
 
-      sort_column = get_klass_var(:@sorters).find {|h| h[:param_key].to_s == (@params[get_klass_var(:@sort_param_key)] || @params[:sort]).underscore}
+      sort_column = get_klass_var(:@sorters).find {|h| h[:param_key].to_s == sory_by_key.underscore}
 
       return default_sort(query) unless sort_column.present?
 
