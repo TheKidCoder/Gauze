@@ -30,6 +30,10 @@ module Gauze
       new(resource, params).build
     end
 
+    def self.sort_param_key(sort_name)
+      @sort_param_key = sort_name
+    end
+
     def initialize(resource, params = {})
       @resource = resource
       @params = params.symbolize_keys
@@ -68,8 +72,8 @@ module Gauze
 
     def build_order_query(query)
       return default_sort(query) unless @params[:sort].present?
-      
-      sort_column = get_klass_var(:@sorters).find {|h| h[:param_key].to_s == @params[:sort].underscore}
+
+      sort_column = get_klass_var(:@sorters).find {|h| h[:param_key].to_s == (@params[get_klass_var(:@sort_param_key)] || @params[:sort]).underscore}
 
       return default_sort(query) unless sort_column.present?
 
